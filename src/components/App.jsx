@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import Searchbar from './Searchbar/Searchbar';
@@ -7,63 +7,55 @@ import ImageGallery from './ImageGallery/ImageGallery';
 import '../index.css';
 
 const API_KEY = '36382362-abb3b9976eb1436b438e40306';
+export const App = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-export class App extends Component {
-  state = {
-    searchQuery: '',
-    images: [],
-    isLoading: false,
-    page: 1,
+  const handleSearchSubmit = query => {
+    setSearchQuery(query);
+    setImages([]);
+    setPage(1);
   };
 
-  handleSearchSubmit = query => {
-    this.setState({ searchQuery: query, images: [], page: 1 });
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
-
-  fetchImages = async () => {
-    const { searchQuery, page } = this.state;
+  const fetchImages = async () => {
     const url = `https://pixabay.com/api/?q=${searchQuery}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`;
 
-    this.setState({ isLoading: true });
+    setIsLoading(true);
 
     try {
       const response = await axios.get(url);
       const data = response.data.hits;
-      this.setState(prevState => ({
-        images: [...prevState.images, ...data],
-        isLoading: false,
-      }));
+      setImages(prevImages => [...prevImages, ...data]);
+      setIsLoading(false);
     } catch (error) {
       console.log('Error:', error);
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.searchQuery !== this.state.searchQuery ||
-      prevState.page !== this.state.page
-    ) {
-      this.fetchImages();
+  useEffect(() => {
+    if (isPageLoaded) {
+      fetchImages();
+    } else {
+      setIsPageLoaded(true);
     }
-  }
+  }, [searchQuery, page]);
 
-  render() {
-    const { images, isLoading } = this.state;
-
-    return (
-      <div>
-        <Searchbar onSubmit={this.handleSearchSubmit} />
-        <ImageGallery
-          images={images}
-          isLoading={isLoading}
-          onLoadMore={this.handleLoadMore}
-        />
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <Searchbar onSubmit={handleSearchSubmit} />
+      <ImageGallery
+        images={images}
+        isLoading={isLoading}
+        onLoadMore={handleLoadMore}
+      />
+    </div>
+  );
+};

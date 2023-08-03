@@ -1,51 +1,43 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Modal from './Modal/Modal';
+
 import styles from './ImageGalleryItem.module.css';
 
-export default class ImageGalleryItem extends Component {
-  state = {
-    showModal: false,
+const ImageGalleryItem = ({ webformatURL, largeImageURL, alt }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  const handleImageClick = () => {
+    setShowModal(true);
   };
 
-  handleImageClick = () => {
-    this.setState({ showModal: true });
+  const closeModal = () => {
+    setShowModal(false);
   };
 
-  closeModal = () => {
-    this.setState({ showModal: false });
-  };
-
-  render() {
-    const { webformatURL, largeImageURL, alt } = this.props;
-    const { showModal } = this.state;
-
-    if (!webformatURL || !largeImageURL || !alt) {
-      return null;
-    }
-
-    return (
-      <li className={styles['gallery-item']}>
-        <img
-          src={webformatURL}
-          alt={alt}
-          className={styles['gallery-item-image']}
-          onClick={this.handleImageClick}
-        />
-        {showModal && (
-          <Modal
-            largeImageURL={largeImageURL}
-            alt={alt}
-            onClose={this.closeModal}
-          />
-        )}
-      </li>
-    );
+  if (!webformatURL || !largeImageURL || !alt) {
+    return null;
   }
-}
+
+  return (
+    <li className={styles['gallery-item']}>
+      <img
+        src={webformatURL}
+        alt={alt}
+        className={styles['gallery-item-image']}
+        onClick={handleImageClick}
+      />
+      {showModal && (
+        <Modal largeImageURL={largeImageURL} alt={alt} onClose={closeModal} />
+      )}
+    </li>
+  );
+};
 
 ImageGalleryItem.propTypes = {
   webformatURL: PropTypes.string.isRequired,
   largeImageURL: PropTypes.string.isRequired,
   alt: PropTypes.string.isRequired,
 };
+
+export default ImageGalleryItem;
