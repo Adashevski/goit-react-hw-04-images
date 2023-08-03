@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 
 import Searchbar from './Searchbar/Searchbar';
@@ -24,7 +24,7 @@ export const App = () => {
     setPage(prevPage => prevPage + 1);
   };
 
-  const fetchImages = async () => {
+  const fetchImages = useCallback(async () => {
     const url = `https://pixabay.com/api/?q=${searchQuery}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`;
 
     setIsLoading(true);
@@ -38,7 +38,7 @@ export const App = () => {
       console.log('Error:', error);
       setIsLoading(false);
     }
-  };
+  }, [searchQuery, page]);
 
   useEffect(() => {
     if (isPageLoaded) {
@@ -46,7 +46,7 @@ export const App = () => {
     } else {
       setIsPageLoaded(true);
     }
-  }, [searchQuery, page]);
+  }, [searchQuery, page, isPageLoaded, fetchImages]);
 
   return (
     <div>
@@ -59,4 +59,3 @@ export const App = () => {
     </div>
   );
 };
-//test
